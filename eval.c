@@ -3246,7 +3246,7 @@ rb_eval(self, n)
   NEXT_NODE;
   
   TARGET_UNDEF:
-     rb_bug("oops");
+     unknown_node(node);
 
   TARGET(NODE_BLOCK);
     if (contnode) {
