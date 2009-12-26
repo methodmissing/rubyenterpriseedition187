@@ -2959,7 +2959,7 @@ unknown_node(node)
 
 #ifdef THREADED_DISPATCH
 #ifdef USE_REPL_SWITCH_DISPATCH
-#define DISPATCH_TABLE
+#define DISPATCH_TABLE static const void * finished = &&finish;
 #define NEXT_NODE do { \
     if (!node) { \
       RETURN(Qnil); \
@@ -3062,7 +3062,7 @@ unknown_node(node)
 } while(0)
 #else
 #define DISPATCH_TABLE \
-static void *dispatch_table[104] = { \
+static const void *dispatch_table[104] = { \
     &&TARGET_UNDEF, \
     &&TARGET_UNDEF, \
     &&TARGET_UNDEF, \
@@ -3167,7 +3167,8 @@ static void *dispatch_table[104] = { \
     &&TARGET_UNDEF, \
     &&TARGET_NODE_DSTR, \
     &&TARGET_NODE_ATTRASGN, \
-};
+}; \
+    static const void * finished = &&finish;
 #define NEXT_NODE do { \
     if (!node) { \
       RETURN(Qnil); \
@@ -3180,7 +3181,7 @@ static void *dispatch_table[104] = { \
 #define TARGET(node) TARGET_##node: \
     asm("#" #node)
 #define TARGET_ALIAS(node)
-#define BREAK goto *(&&finish);
+#define BREAK goto *finished;
 #define DEFAULT_NODE TARGET_UNDEF: \
      unknown_node(node); 
 #define DISPATCH_END
