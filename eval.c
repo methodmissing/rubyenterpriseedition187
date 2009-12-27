@@ -3838,6 +3838,257 @@ eval_cdecl(self, node, result)
       rb_const_set(ruby_cbase, node->nd_vid, result);
 }
 
+#if (defined(__GNUC__) || defined (__SUNPRO_C)) && defined(USE_THREADED_DISPATCH)
+#define THREADED_DISPATCH
+#endif
+
+#ifdef THREADED_DISPATCH
+#ifdef USE_REPL_SWITCH_DISPATCH
+#define DISPATCH_TABLE
+#define NEXT_NODE do { \
+  CHECK_INTS; \
+    result = Qnil; \
+    if (!node) return result; \
+    ruby_current_node = node; \    
+    switch(nd_type(node)) { \
+    case NODE_SCOPE: goto TARGET_NODE_SCOPE; \
+    case NODE_BLOCK: goto TARGET_NODE_BLOCK; \
+    case NODE_IF: goto TARGET_NODE_IF; \
+    case NODE_CASE: goto TARGET_NODE_CASE; \
+    case NODE_WHEN: goto TARGET_NODE_WHEN; \
+    case NODE_OPT_N: goto TARGET_NODE_OPT_N; \
+    case NODE_WHILE: goto TARGET_NODE_WHILE; \
+    case NODE_UNTIL: goto TARGET_NODE_UNTIL; \
+    case NODE_ITER: goto TARGET_NODE_ITER; \
+    case NODE_FOR: goto TARGET_NODE_ITER; \
+    case NODE_BREAK: goto TARGET_NODE_BREAK; \
+    case NODE_NEXT: goto TARGET_NODE_NEXT; \
+    case NODE_REDO: goto TARGET_NODE_REDO; \
+    case NODE_RETRY: goto TARGET_NODE_RETRY; \
+    case NODE_RESCUE: goto TARGET_NODE_RESCUE; \
+    case NODE_ENSURE: goto TARGET_NODE_ENSURE; \
+    case NODE_AND: goto TARGET_NODE_AND; \
+    case NODE_OR: goto TARGET_NODE_OR; \
+    case NODE_NOT: goto TARGET_NODE_NOT; \
+    case NODE_MASGN: goto TARGET_NODE_MASGN; \
+    case NODE_LASGN: goto TARGET_NODE_LASGN; \
+    case NODE_DASGN: goto TARGET_NODE_DASGN; \
+    case NODE_DASGN_CURR: goto TARGET_NODE_DASGN_CURR; \
+    case NODE_GASGN: goto TARGET_NODE_GASGN; \
+    case NODE_IASGN: goto TARGET_NODE_IASGN; \
+    case NODE_CDECL: goto TARGET_NODE_CDECL; \
+    case NODE_CVASGN: goto TARGET_NODE_CVASGN; \
+    case NODE_CVDECL: goto TARGET_NODE_CVDECL; \
+    case NODE_OP_ASGN1: goto TARGET_NODE_OP_ASGN1; \
+    case NODE_OP_ASGN2: goto TARGET_NODE_OP_ASGN2; \
+    case NODE_OP_ASGN_AND: goto TARGET_NODE_OP_ASGN_AND; \
+    case NODE_OP_ASGN_OR: goto TARGET_NODE_OP_ASGN_OR; \
+    case NODE_CALL: goto TARGET_NODE_CALL; \
+    case NODE_FCALL: goto TARGET_NODE_FCALL; \
+    case NODE_VCALL: goto TARGET_NODE_VCALL; \
+    case NODE_SUPER: goto TARGET_NODE_SUPER; \
+    case NODE_ZSUPER: goto TARGET_NODE_SUPER; \
+    case NODE_ARRAY: goto TARGET_NODE_ARRAY; \
+    case NODE_ZARRAY: goto TARGET_NODE_ZARRAY; \
+    case NODE_HASH: goto TARGET_NODE_HASH; \
+    case NODE_RETURN: goto TARGET_NODE_RETURN; \
+    case NODE_YIELD: goto TARGET_NODE_YIELD; \
+    case NODE_LVAR: goto TARGET_NODE_LVAR; \
+    case NODE_DVAR: goto TARGET_NODE_DVAR; \
+    case NODE_GVAR: goto TARGET_NODE_GVAR; \
+    case NODE_IVAR: goto TARGET_NODE_IVAR; \
+    case NODE_CONST: goto TARGET_NODE_CONST; \
+    case NODE_CVAR: goto TARGET_NODE_CVAR; \
+    case NODE_NTH_REF: goto TARGET_NODE_NTH_REF; \
+    case NODE_BACK_REF: goto TARGET_NODE_BACK_REF; \
+    case NODE_MATCH: goto TARGET_NODE_MATCH; \
+    case NODE_MATCH2: goto TARGET_NODE_MATCH2; \
+    case NODE_MATCH3: goto TARGET_NODE_MATCH3; \
+    case NODE_LIT: goto TARGET_NODE_LIT; \
+    case NODE_STR: goto TARGET_NODE_STR; \
+    case NODE_DSTR: goto TARGET_NODE_DSTR; \
+    case NODE_XSTR: goto TARGET_NODE_XSTR; \
+    case NODE_DXSTR: goto TARGET_NODE_DSTR; \
+    case NODE_EVSTR: goto TARGET_NODE_EVSTR; \
+    case NODE_DREGX: goto TARGET_NODE_DSTR; \
+    case NODE_DREGX_ONCE: goto TARGET_NODE_DSTR; \
+    case NODE_ARGSCAT: goto TARGET_NODE_ARGSCAT; \
+    case NODE_ARGSPUSH: goto TARGET_NODE_ARGSPUSH; \
+    case NODE_SPLAT: goto TARGET_NODE_SPLAT; \
+    case NODE_TO_ARY: goto TARGET_NODE_TO_ARY; \
+    case NODE_SVALUE: goto TARGET_NODE_SVALUE; \
+    case NODE_BLOCK_ARG: goto TARGET_NODE_BLOCK_ARG; \
+    case NODE_BLOCK_PASS: goto TARGET_NODE_BLOCK_PASS; \
+    case NODE_DEFN: goto TARGET_NODE_DEFN; \
+    case NODE_DEFS: goto TARGET_NODE_DEFS; \
+    case NODE_ALIAS: goto TARGET_NODE_ALIAS; \
+    case NODE_VALIAS: goto TARGET_NODE_VALIAS; \
+    case NODE_UNDEF: goto TARGET_NODE_UNDEF; \
+    case NODE_CLASS: goto TARGET_NODE_CLASS; \
+    case NODE_MODULE: goto TARGET_NODE_MODULE; \
+    case NODE_SCLASS: goto TARGET_NODE_SCLASS; \
+    case NODE_COLON2: goto TARGET_NODE_COLON2; \
+    case NODE_COLON3: goto TARGET_NODE_COLON3; \
+    case NODE_DOT2: goto TARGET_NODE_DOT2; \
+    case NODE_DOT3: goto TARGET_NODE_DOT2; \
+    case NODE_FLIP2: goto TARGET_NODE_FLIP2; \
+    case NODE_FLIP3: goto TARGET_NODE_FLIP3; \
+    case NODE_SELF: goto TARGET_NODE_SELF; \
+    case NODE_NIL: goto TARGET_NODE_NIL; \
+    case NODE_TRUE: goto TARGET_NODE_TRUE; \
+    case NODE_FALSE: goto TARGET_NODE_FALSE; \
+    case NODE_DEFINED: goto TARGET_NODE_DEFINED; \
+    case NODE_NEWLINE: goto TARGET_NODE_NEWLINE; \
+    case NODE_POSTEXE: goto TARGET_NODE_POSTEXE; \
+    case NODE_DSYM: goto TARGET_NODE_DSTR; \
+    case NODE_ATTRASGN: goto TARGET_NODE_ATTRASGN; \
+    default: unknown_node(node); \
+    } \
+} while(0)
+#else
+#define DISPATCH_TABLE \
+static const void *dispatch_table[104] = { \
+    &&TARGET_UNDEF, \
+    &&TARGET_UNDEF, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_SCOPE, \
+    &&TARGET_NODE_BLOCK, \
+    &&TARGET_NODE_IF, \
+    &&TARGET_NODE_CASE, \
+    &&TARGET_NODE_WHEN, \
+    &&TARGET_NODE_OPT_N, \
+    &&TARGET_NODE_WHILE, \
+    &&TARGET_NODE_UNTIL, \
+    &&TARGET_NODE_ITER, \
+    &&TARGET_NODE_ITER, \
+    &&TARGET_NODE_BREAK, \
+    &&TARGET_NODE_NEXT, \
+    &&TARGET_NODE_REDO, \
+    &&TARGET_NODE_RETRY, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_RESCUE, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_ENSURE, \
+    &&TARGET_NODE_AND, \
+    &&TARGET_NODE_OR, \
+    &&TARGET_NODE_NOT, \
+    &&TARGET_NODE_MASGN, \
+    &&TARGET_NODE_LASGN, \
+    &&TARGET_NODE_DASGN, \
+    &&TARGET_NODE_DASGN_CURR, \
+    &&TARGET_NODE_GASGN, \
+    &&TARGET_NODE_IASGN, \
+    &&TARGET_NODE_CDECL, \
+    &&TARGET_NODE_CVASGN, \
+    &&TARGET_NODE_CVDECL, \
+    &&TARGET_NODE_OP_ASGN1, \
+    &&TARGET_NODE_OP_ASGN2, \
+    &&TARGET_NODE_OP_ASGN_AND, \
+    &&TARGET_NODE_OP_ASGN_OR, \
+    &&TARGET_NODE_CALL, \
+    &&TARGET_NODE_FCALL, \
+    &&TARGET_NODE_VCALL, \
+    &&TARGET_NODE_SUPER, \
+    &&TARGET_NODE_SUPER, \
+    &&TARGET_NODE_ARRAY, \
+    &&TARGET_NODE_ZARRAY, \
+    &&TARGET_NODE_HASH, \
+    &&TARGET_NODE_RETURN, \
+    &&TARGET_NODE_YIELD, \
+    &&TARGET_NODE_LVAR, \
+    &&TARGET_NODE_DVAR, \
+    &&TARGET_NODE_GVAR, \
+    &&TARGET_NODE_IVAR, \
+    &&TARGET_NODE_CONST, \
+    &&TARGET_NODE_CVAR, \
+    &&TARGET_NODE_NTH_REF, \
+    &&TARGET_NODE_BACK_REF, \
+    &&TARGET_NODE_MATCH, \
+    &&TARGET_NODE_MATCH2, \
+    &&TARGET_NODE_MATCH3, \
+    &&TARGET_NODE_LIT, \
+    &&TARGET_NODE_STR, \
+    &&TARGET_NODE_DSTR, \
+    &&TARGET_NODE_XSTR, \
+    &&TARGET_NODE_DSTR, \
+    &&TARGET_NODE_EVSTR, \
+    &&TARGET_NODE_DSTR, \
+    &&TARGET_NODE_DSTR, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_ARGSCAT, \
+    &&TARGET_NODE_ARGSPUSH, \
+    &&TARGET_NODE_SPLAT, \
+    &&TARGET_NODE_TO_ARY, \
+    &&TARGET_NODE_SVALUE, \
+    &&TARGET_NODE_BLOCK_ARG, \
+    &&TARGET_NODE_BLOCK_PASS, \
+    &&TARGET_NODE_DEFN, \
+    &&TARGET_NODE_DEFS, \
+    &&TARGET_NODE_ALIAS, \
+    &&TARGET_NODE_VALIAS, \
+    &&TARGET_NODE_UNDEF, \
+    &&TARGET_NODE_CLASS, \
+    &&TARGET_NODE_MODULE, \
+    &&TARGET_NODE_SCLASS, \
+    &&TARGET_NODE_COLON2, \
+    &&TARGET_NODE_COLON3, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_DOT2, \
+    &&TARGET_NODE_DOT2, \
+    &&TARGET_NODE_FLIP2, \
+    &&TARGET_NODE_FLIP3, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_SELF, \
+    &&TARGET_NODE_NIL, \
+    &&TARGET_NODE_TRUE, \
+    &&TARGET_NODE_FALSE, \
+    &&TARGET_NODE_DEFINED, \
+    &&TARGET_NODE_NEWLINE, \
+    &&TARGET_NODE_POSTEXE, \
+    &&TARGET_UNDEF, \
+    &&TARGET_UNDEF, \
+    &&TARGET_UNDEF, \
+    &&TARGET_UNDEF, \
+    &&TARGET_UNDEF, \
+    &&TARGET_NODE_DSTR, \
+    &&TARGET_NODE_ATTRASGN \
+}; \
+{{
+#define NEXT_NODE do { \
+    CHECK_INTS; \
+    result = Qnil; \
+    if (!node) return result; \
+    ruby_current_node = node; \
+    goto *dispatch_table[nd_type(node)]; \
+} while (0)
+#endif
+#define DISPATCH_BEGIN NEXT_NODE; 
+#define TARGET(node) TARGET_##node: \
+    asm("#" #node); 
+#define TARGET_ALIAS(node)
+#define BREAK return result;
+#define DEFAULT_NODE TARGET_UNDEF: \
+     unknown_node(node); 
+#define DISPATCH_END } \
+}
+#else
+#define DISPATCH_TABLE
+#define DISPATCH_BEGIN \
+    again: \
+    CHECK_INTS; \
+    result = Qnil; \
+    if (node) { \
+      ruby_current_node = node; \
+      switch (nd_type(node)) {
+#define NEXT_NODE goto again;
+#define TARGET(node) case (node):
+#define TARGET_ALIAS(node) case (node):
+#define BREAK return result;
+#define DEFAULT_NODE \
+  default: \
+     unknown_node(node);
+#define DISPATCH_END }}
+#endif
 
 static VALUE
 rb_eval(self, node)
@@ -3845,67 +4096,63 @@ rb_eval(self, node)
   NODE * node;
 {
   VALUE result;
-
-again:
-  CHECK_INTS;
-  result = Qnil;
-  if (node) {
-    ruby_current_node = node;
-    switch (nd_type(node)) {
-      case NODE_BLOCK:
+  DISPATCH_TABLE;
+  DISPATCH_BEGIN;
+  
+    TARGET(NODE_BLOCK);
 	while (node->nd_next) {
 	    rb_eval(self, node->nd_head);
 	    node = node->nd_next;
 	}
 	node = node->nd_head;
-	goto again;
+	NEXT_NODE;
 
-      case NODE_POSTEXE:
+	TARGET(NODE_POSTEXE);
 	rb_f_END();
 	nd_set_type(node, NODE_NIL); /* exec just once */
-	break;
+	BREAK;
 
 	/* begin .. end without clauses */
-      case NODE_BEGIN:
+	TARGET(NODE_BEGIN);
 	node = node->nd_body;
-	goto again;
+	NEXT_NODE;
 
 	/* nodes for speed-up(default match) */
-      case NODE_MATCH:
+	TARGET(NODE_MATCH);
 	result = rb_reg_match2(node->nd_lit);
-	break;
+	BREAK;
 
 	/* nodes for speed-up(literal match) */
-      case NODE_MATCH2:
+	TARGET(NODE_MATCH2);
         result = eval_match2(self, node);
-	break;
+	BREAK;
 
 	/* nodes for speed-up(literal match) */
-      case NODE_MATCH3:
+	TARGET(NODE_MATCH3);
         result = eval_match3(self,node);
-	break;
+	BREAK;
 
 	/* node for speed-up(top-level loop for -n/-p) */
-      case NODE_OPT_N:
+	TARGET(NODE_OPT_N);
         eval_opt_n(self, node);
-        break;
+        BREAK;
 
-      case NODE_SELF:
+	TARGET(NODE_SELF);
 	result = self;
-        break;
+        BREAK;
 
-      case NODE_NIL:
-	break;
+	TARGET(NODE_NIL);
+	BREAK;
 
-      case NODE_TRUE:
+	TARGET(NODE_TRUE);
 	result = Qtrue;
-        break;
+        BREAK;
 
-      case NODE_FALSE:
+	TARGET(NODE_FALSE);
 	result = Qfalse;
-        break;
+        BREAK;
 
-      case NODE_IF:
+	TARGET(NODE_IF);
 	if (RTEST(rb_eval(self, node->nd_cond))) {
 	    EXEC_EVENT_HOOK(RUBY_EVENT_LINE, node, self,
 			    ruby_frame->last_func,
@@ -3918,63 +4165,63 @@ again:
 			    ruby_frame->last_class);
 	    node = node->nd_else;
 	}
-	goto again;
+	NEXT_NODE;
 
-      case NODE_WHEN:
-        if (node = eval_when(self, node)) goto again;
-        break;
+	TARGET(NODE_WHEN);
+        if (node = eval_when(self, node)) NEXT_NODE;
+        BREAK;
 
-      case NODE_CASE:
-        if (node = eval_case(self, node)) goto again;
-        break;
+	TARGET(NODE_CASE);
+        if (node = eval_case(self, node)) NEXT_NODE;
+        BREAK;
 
-      case NODE_WHILE:
+	TARGET(NODE_WHILE);
         result = eval_while(self,node);
-        break;
+        BREAK;
 
-      case NODE_UNTIL:
+	TARGET(NODE_UNTIL);
         result = eval_until(self,node);
-        break;
+        BREAK;
 
-      case NODE_BLOCK_PASS:
+	TARGET(NODE_BLOCK_PASS);
 	result = block_pass(self, node);
-	break;
+	BREAK;
 
-      case NODE_ITER:
-      case NODE_FOR:
+	TARGET_ALIAS(NODE_FOR);
+	TARGET(NODE_ITER);
 	result = eval_iter(self, node);
-	break;
+	BREAK;
 
-      case NODE_BREAK:
+	TARGET(NODE_BREAK);
 	break_jump(rb_eval(self, node->nd_stts));
-	break;
+	BREAK;
 
-      case NODE_NEXT:
+	TARGET(NODE_NEXT);
 	next_jump(rb_eval(self, node->nd_stts));
-	break;
+	BREAK;
 
-      case NODE_REDO:
+	TARGET(NODE_REDO);
 	JUMP_TAG(TAG_REDO);
-	break;
+	BREAK;
 
-      case NODE_RETRY:
+	TARGET(NODE_RETRY);
 	JUMP_TAG(TAG_RETRY);
-	break;
+	BREAK;
 
-      case NODE_SPLAT:
+	TARGET(NODE_SPLAT);
 	result = splat_value(rb_eval(self, node->nd_head));
-	break;
+	BREAK;
 
-      case NODE_TO_ARY:
+	TARGET(NODE_TO_ARY);
 	result = rb_ary_to_ary(rb_eval(self, node->nd_head));
-	break;
+	BREAK;
 
-      case NODE_SVALUE:
+	TARGET(NODE_SVALUE);
 	result = avalue_splat(rb_eval(self, node->nd_head));
 	if (result == Qundef) result = Qnil;
-	break;
+	BREAK;
 
-      case NODE_YIELD:
+	TARGET(NODE_YIELD);
 	if (node->nd_head) {
 	    result = rb_eval(self, node->nd_head);
 	    ruby_current_node = node;
@@ -3984,188 +4231,188 @@ again:
 	}
 	SET_CURRENT_SOURCE();
 	result = rb_yield_0(result, 0, 0, 0, node->nd_state);
-	break;
+	BREAK;
 
-      case NODE_RESCUE:
+	TARGET(NODE_RESCUE);
         result = eval_rescue(self,node);
         if (result == Qundef) {  /* handle else clause w/o recursion */
           node = node->nd_else;
-          goto again;
+          NEXT_NODE;
         }
-	break;
+	BREAK;
 
-      case NODE_ENSURE:
+	TARGET(NODE_ENSURE);
         result = eval_ensure(self,node);
-	break;
+	BREAK;
 
-      case NODE_AND:
+	TARGET(NODE_AND);
 	result = rb_eval(self, node->nd_1st);
-	if (!RTEST(result)) break;
+	if (!RTEST(result)) BREAK;
 	node = node->nd_2nd;
-	goto again;
+	NEXT_NODE;
 
-      case NODE_OR:
+	TARGET(NODE_OR);
 	result = rb_eval(self, node->nd_1st);
-	if (RTEST(result)) break;
+	if (RTEST(result)) BREAK;
 	node = node->nd_2nd;
-	goto again;
+	NEXT_NODE;
 
-      case NODE_NOT:
+    TARGET(NODE_NOT)
 	result = RTEST(rb_eval(self, node->nd_body)) ? Qfalse : Qtrue;
-	break;
+	BREAK;
 
-      case NODE_DOT2:
-      case NODE_DOT3:
+	TARGET_ALIAS(NODE_DOT3);
+	TARGET(NODE_DOT2);
         result = eval_dot(self,node);
-        break;
+        BREAK;
 
-      case NODE_FLIP2:		/* like AWK */
+	TARGET(NODE_FLIP2);		/* like AWK */
         result = eval_flip2(self,node);
-	break;
+	BREAK;
 
-      case NODE_FLIP3:		/* like SED */
+	TARGET(NODE_FLIP3);		/* like SED */
         result = eval_flip3(self,node);
-	break;
+	BREAK;
 
-      case NODE_RETURN:
+	TARGET(NODE_RETURN);
 	return_jump(rb_eval(self, node->nd_stts));
-	break;
+	BREAK;
 
-      case NODE_ARGSCAT:
+	TARGET(NODE_ARGSCAT);
 	result = rb_eval(self, node->nd_head);
 	result = rb_ary_concat(result, splat_value(rb_eval(self, node->nd_body)));
-	break;
+	BREAK;
 
-      case NODE_ARGSPUSH:
+	TARGET(NODE_ARGSPUSH);
 	result = rb_ary_dup(rb_eval(self, node->nd_head));
 	result = rb_ary_push(result, rb_eval(self, node->nd_body));
-	break;
+	BREAK;
 
-      case NODE_ATTRASGN:
+	TARGET(NODE_ATTRASGN);
         result = eval_attrasgn(self,node);
-        break;
+        BREAK;
 
-      case NODE_CALL:
+    TARGET(NODE_CALL);
         result = eval_call(self,node);
-	break;
+	BREAK;
 
-      case NODE_FCALL:
+	TARGET(NODE_FCALL);
         result = eval_fcall(self,node);
-	break;
+	BREAK;
 
-      case NODE_VCALL:
+	TARGET(NODE_VCALL);
 	SET_CURRENT_SOURCE();
 	result = rb_call(CLASS_OF(self),self,node->nd_mid,0,0,2,self);
-	break;
+	BREAK;
 
-      case NODE_SUPER:
-      case NODE_ZSUPER:
+	TARGET_ALIAS(NODE_ZSUPER);
+	TARGET(NODE_SUPER);
         result = eval_super(self,node);
-	break;
+	BREAK;
 
-      case NODE_SCOPE:
+	TARGET(NODE_SCOPE);
         result = eval_scope(self,node);
-        break;
+        BREAK;
 
-      case NODE_OP_ASGN1:
+	TARGET(NODE_OP_ASGN1);
         result = eval_op_asgn1(self,node);
-	break;
+	BREAK;
 
-      case NODE_OP_ASGN2:
+	TARGET(NODE_OP_ASGN2);
         result = eval_op_asgn2(self,node);
-	break;
+	BREAK;
 
-      case NODE_OP_ASGN_AND:
+	TARGET(NODE_OP_ASGN_AND);
 	result = rb_eval(self, node->nd_head);
-	if (!RTEST(result)) break;
+	if (!RTEST(result)) BREAK;
 	node = node->nd_value;
-	goto again;
+	NEXT_NODE;
 
-      case NODE_OP_ASGN_OR:
+	TARGET(NODE_OP_ASGN_OR);
 	if ((node->nd_aid && !is_defined(self, node->nd_head, 0)) ||
 	    !RTEST(result = rb_eval(self, node->nd_head))) {
 	    node = node->nd_value;
-	    goto again;
+	    NEXT_NODE;
 	}
-	break;
+	BREAK;
 
-      case NODE_MASGN:
+	TARGET(NODE_MASGN);
 	result = massign(self, node, rb_eval(self, node->nd_value), 0);
-	break;
+	BREAK;
 
-      case NODE_LASGN:
+	TARGET(NODE_LASGN);
 	if (ruby_scope->local_vars == 0)
 	    rb_bug("unexpected local variable assignment");
 	result = rb_eval(self, node->nd_value);
 	ruby_scope->local_vars[node->nd_cnt] = result;
-	break;
+	BREAK;
 
-      case NODE_DASGN:
+	TARGET(NODE_DASGN);
 	result = rb_eval(self, node->nd_value);
 	dvar_asgn(node->nd_vid, result);
-	break;
+	BREAK;
 
-      case NODE_DASGN_CURR:
+	TARGET(NODE_DASGN_CURR);
 	result = rb_eval(self, node->nd_value);
 	dvar_asgn_curr(node->nd_vid, result);
-	break;
+	BREAK;
 
-      case NODE_GASGN:
+	TARGET(NODE_GASGN);
 	result = rb_eval(self, node->nd_value);
 	rb_gvar_set(node->nd_entry, result);
-	break;
+	BREAK;
 
-      case NODE_IASGN:
+	TARGET(NODE_IASGN);
 	result = rb_eval(self, node->nd_value);
 	rb_ivar_set(self, node->nd_vid, result);
-	break;
+	BREAK;
 
-      case NODE_CDECL:
+	TARGET(NODE_CDECL);
         result = rb_eval(self, node->nd_value);
         eval_cdecl(self, node, result);
-	break;
+	BREAK;
 
-      case NODE_CVDECL:
+	TARGET(NODE_CVDECL);
 	if (NIL_P(ruby_cbase)) {
 	    rb_raise(rb_eTypeError, "no class/module to define class variable");
 	}
         result = rb_eval(self, node->nd_value);
         eval_cvar_set(node, result, Qtrue);
-	break;
+	BREAK;
 
-      case NODE_CVASGN:
+	TARGET(NODE_CVASGN);
         result = rb_eval(self, node->nd_value);
         eval_cvar_set(node, result, Qfalse);
-	break;
+	BREAK;
 
-      case NODE_LVAR:
+	TARGET(NODE_LVAR);
 	if (ruby_scope->local_vars == 0) {
 	    rb_bug("unexpected local variable");
 	}
 	result = ruby_scope->local_vars[node->nd_cnt];
-	break;
+	BREAK;
 
-      case NODE_DVAR:
+	TARGET(NODE_DVAR);
 	result = rb_dvar_ref(node->nd_vid);
-	break;
+	BREAK;
 
-      case NODE_GVAR:
+	TARGET(NODE_GVAR);
 	result = rb_gvar_get(node->nd_entry);
-	break;
+	BREAK;
 
-      case NODE_IVAR:
+	TARGET(NODE_IVAR);
 	result = rb_ivar_get(self, node->nd_vid);
-	break;
+	BREAK;
 
-      case NODE_CONST:
+	TARGET(NODE_CONST);
 	result = ev_const_get(ruby_cref, node->nd_vid, self);
-	break;
+	BREAK;
 
-      case NODE_CVAR:
+	TARGET(NODE_CVAR);
 	result = rb_cvar_get(cvar_cbase(), node->nd_vid);
-	break;
+	BREAK;
 
-      case NODE_BLOCK_ARG:
+	TARGET(NODE_BLOCK_ARG);
 	if (ruby_scope->local_vars == 0)
 	    rb_bug("unexpected block argument");
 	if (rb_block_given_p()) {
@@ -4175,9 +4422,9 @@ again:
 	else {
 	    result = Qnil;
 	}
-	break;
+	BREAK;
 
-      case NODE_COLON2:
+	TARGET(NODE_COLON2);
 	result = rb_eval(self, node->nd_head);
 	if (rb_is_const_id(node->nd_mid)) {
 	    switch (TYPE(result)) {
@@ -4193,17 +4440,17 @@ again:
 	}
 	else
 	    result = rb_funcall(result, node->nd_mid, 0, 0);
-	break;
+	BREAK;
 
-      case NODE_COLON3:
+	TARGET(NODE_COLON3);
 	result = rb_const_get_from(rb_cObject, node->nd_mid);
-	break;
+	BREAK;
 
-      case NODE_NTH_REF:
+	TARGET(NODE_NTH_REF);
 	result = rb_reg_nth_match(node->nd_nth, MATCH_DATA);
-	break;
+	BREAK;
 
-      case NODE_BACK_REF:
+	TARGET(NODE_BACK_REF);
 	switch (node->nd_nth) {
 	  case '&':
 	    result = rb_reg_last_match(MATCH_DATA);
@@ -4220,101 +4467,99 @@ again:
 	  default:
 	    rb_bug("unexpected back-ref");
 	}
-	break;
+	BREAK;
 
-      case NODE_HASH:
+	TARGET(NODE_HASH);
         result = eval_hash(self,node);
-	break;
+	BREAK;
 
-      case NODE_ZARRAY:		/* zero length list */
+	TARGET(NODE_ZARRAY);		/* zero length list */
 	result = rb_ary_new();
-	break;
+	BREAK;
 
-      case NODE_ARRAY:
+	TARGET(NODE_ARRAY);
         result = eval_array(self,node);
-	break;
+	BREAK;
 
-      case NODE_STR:
+	TARGET(NODE_STR);
 	result = rb_str_new3(node->nd_lit);
-	break;
+	BREAK;
 
-      case NODE_EVSTR:
+	TARGET(NODE_EVSTR);
 	result = rb_obj_as_string(rb_eval(self, node->nd_body));
-	break;
+	BREAK;
 
-      case NODE_DSTR:
-      case NODE_DXSTR:
-      case NODE_DREGX:
-      case NODE_DREGX_ONCE:
-      case NODE_DSYM:
+	TARGET_ALIAS(NODE_DXSTR);
+	TARGET_ALIAS(NODE_DREGX);
+	TARGET_ALIAS(NODE_DREGX_ONCE);
+	TARGET_ALIAS(NODE_DSYM);
+	TARGET(NODE_DSTR);
         result = eval_slit(self, node);
-        if (result == Qundef) goto again;
-	break;
+        if (result == Qundef) NEXT_NODE;
+	BREAK;
 
-      case NODE_XSTR:
+	TARGET(NODE_XSTR);
 	result = rb_funcall(self, '`', 1, rb_str_new3(node->nd_lit));
-	break;
+	BREAK;
 
-      case NODE_LIT:
+	TARGET(NODE_LIT);
 	result = node->nd_lit;
-	break;
+	BREAK;
 
-      case NODE_DEFN:
+	TARGET(NODE_DEFN);
 	if (node->nd_defn)
           eval_defn(self,node);
-	break;
+	BREAK;
 
-      case NODE_DEFS:
+	TARGET(NODE_DEFS);
 	if (node->nd_defn) 
           eval_defs(self,node);
-	break;
+	BREAK;
 
-      case NODE_UNDEF:
+	TARGET(NODE_UNDEF);
 	if (NIL_P(ruby_class)) {
 	    rb_raise(rb_eTypeError, "no class to undef method");
 	}
 	rb_undef(ruby_class, rb_to_id(rb_eval(self, node->u2.node)));
-	break;
+	BREAK;
 
-      case NODE_ALIAS:
+	TARGET(NODE_ALIAS);
 	if (NIL_P(ruby_class)) {
 	    rb_raise(rb_eTypeError, "no class to make alias");
 	}
 	rb_alias(ruby_class, rb_to_id(rb_eval(self, node->u1.node)),
 		             rb_to_id(rb_eval(self, node->u2.node)));
-	break;
+	BREAK;
 
-      case NODE_VALIAS:
+	TARGET(NODE_VALIAS);
 	rb_alias_variable(node->u1.id, node->u2.id);
-	break;
+	BREAK;
 
-      case NODE_CLASS:
+	TARGET(NODE_CLASS);
         result = eval_class(self,node);
-	break;
+	BREAK;
 
-      case NODE_MODULE:
+	TARGET(NODE_MODULE);
         result = eval_module(self,node);
-	break;
+	BREAK;
 
-      case NODE_SCLASS:
+	TARGET(NODE_SCLASS);
         result = eval_sclass(self,node);
-	break;
+	BREAK;
 
-      case NODE_DEFINED:
+	TARGET(NODE_DEFINED);
         result = eval_defined(self,node);
-	break;
+	BREAK;
 
-      case NODE_NEWLINE:
+	TARGET(NODE_NEWLINE);
 	EXEC_EVENT_HOOK(RUBY_EVENT_LINE, node, self, 
 			ruby_frame->last_func,
 			ruby_frame->last_class);
 	node = node->nd_next;
-	goto again;
+	NEXT_NODE;
 
-      default:
-	unknown_node(node);
-    }
-  }
+  DEFAULT_NODE;
+  DISPATCH_END;
   return result;
 }
 
