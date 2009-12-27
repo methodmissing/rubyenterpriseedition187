@@ -657,6 +657,7 @@ AC_ARG_ENABLE(threaded-dispatch,
        [use_threaded_dispatch=$enableval])
 if test "$use_threaded_dispatch" = yes; then
     AC_DEFINE(USE_THREADED_DISPATCH)
+    XCFLAGS="$XCFLAGS"
 fi
 
 AC_ARG_ENABLE(repl-switch-dispatch,
@@ -665,6 +666,7 @@ AC_ARG_ENABLE(repl-switch-dispatch,
 if test "$use_repl_switch_dispatch" = yes; then
     AC_DEFINE(USE_THREADED_DISPATCH)
     AC_DEFINE(USE_REPL_SWITCH_DISPATCH)
+    XCFLAGS="$XCFLAGS"
 fi
 
 AC_STRUCT_TIMEZONE

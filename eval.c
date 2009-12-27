@@ -3166,25 +3166,28 @@ static const void *dispatch_table[104] = { \
     &&TARGET_UNDEF, \
     &&TARGET_UNDEF, \
     &&TARGET_NODE_DSTR, \
-    &&TARGET_NODE_ATTRASGN, \
+    &&TARGET_NODE_ATTRASGN \
 }; \
     static const void * finished = &&finish;
+
 #define NEXT_NODE do { \
-    if (!node) { \
-      RETURN(Qnil); \
-    } \
+    if (!node) RETURN(Qnil); \
     ruby_current_node = node; \
     goto *dispatch_table[nd_type(node)]; \
 } while (0)
 #endif
 #define DISPATCH_BEGIN NEXT_NODE; 
 #define TARGET(node) TARGET_##node: \
-    asm("#" #node)
+    asm("# " #node); 
 #define TARGET_ALIAS(node)
 #define BREAK goto *finished;
 #define DEFAULT_NODE TARGET_UNDEF: \
      unknown_node(node); 
 #define DISPATCH_END
+#define RETURN(v) do { \
+    result = (v); \
+    goto *finished; \
+} while (0)
 #else
 #define DISPATCH_TABLE
 #define DISPATCH_BEGIN \
@@ -3200,6 +3203,10 @@ static const void *dispatch_table[104] = { \
   default: \
      unknown_node(node);
 #define DISPATCH_END }
+#define RETURN(v) do { \
+    result = (v); \
+    goto finish; \
+} while (0)
 #endif
 
 static VALUE
@@ -3212,11 +3219,6 @@ rb_eval(self, n)
     int state;
     volatile VALUE result = Qnil;
     st_data_t data;
-
-#define RETURN(v) do { \
-    result = (v); \
-    goto finish; \
-} while (0)
 
   DISPATCH_TABLE;
   DISPATCH_BEGIN;
