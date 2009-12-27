@@ -3844,12 +3844,12 @@ eval_cdecl(self, node, result)
 
 #ifdef THREADED_DISPATCH
 #ifdef USE_REPL_SWITCH_DISPATCH
-#define DISPATCH_TABLE
+#define DISPATCH_TABLE {{
 #define NEXT_NODE do { \
   CHECK_INTS; \
     result = Qnil; \
     if (!node) return result; \
-    ruby_current_node = node; \    
+    ruby_current_node = node; \
     switch(nd_type(node)) { \
     case NODE_SCOPE: goto TARGET_NODE_SCOPE; \
     case NODE_BLOCK: goto TARGET_NODE_BLOCK; \
@@ -4069,8 +4069,7 @@ static const void *dispatch_table[104] = { \
 #define BREAK return result;
 #define DEFAULT_NODE TARGET_UNDEF: \
      unknown_node(node); 
-#define DISPATCH_END } \
-}
+#define DISPATCH_END }}
 #else
 #define DISPATCH_TABLE
 #define DISPATCH_BEGIN \
