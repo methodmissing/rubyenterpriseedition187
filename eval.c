@@ -4063,8 +4063,9 @@ static const void *dispatch_table[104] = { \
 } while (0)
 #endif
 #define DISPATCH_BEGIN NEXT_NODE; 
+#define ND_VALUE(n) #n
 #define TARGET(node) TARGET_##node: \
-    asm("#" #node); 
+   asm("#" ND_VALUE(n));
 #define TARGET_ALIAS(node)
 #define BREAK return result;
 #define DEFAULT_NODE TARGET_UNDEF: \
@@ -4082,7 +4083,7 @@ static const void *dispatch_table[104] = { \
 #define NEXT_NODE goto again;
 #define TARGET(node) case (node):
 #define TARGET_ALIAS(node) case (node):
-#define BREAK return result;
+#define BREAK break;
 #define DEFAULT_NODE \
   default: \
      unknown_node(node);
