@@ -675,16 +675,7 @@ AC_ARG_ENABLE(threaded-dispatch,
        [use_threaded_dispatch=$enableval])
 if test "$use_threaded_dispatch" = yes; then
     AC_DEFINE(USE_THREADED_DISPATCH)
-    XCFLAGS="$XCFLAGS -fno-strict-aliasing -fwrapv -fno-gcse --param max-goto-duplication-insns=100000"
-fi
-
-AC_ARG_ENABLE(repl-switch-dispatch,
-       [  --enable-repl-switch-dispatch       use repl switch dispatch for rb_eval],
-       [use_repl_switch_dispatch=$enableval])
-if test "$use_repl_switch_dispatch" = yes; then
-    AC_DEFINE(USE_THREADED_DISPATCH)
-    AC_DEFINE(USE_REPL_SWITCH_DISPATCH)
-    XCFLAGS="$XCFLAGS -fno-strict-aliasing -fwrapv -fno-gcse --param max-goto-duplication-insns=100000"
+    XCFLAGS="$XCFLAGS -fno-strict-aliasing -fwrapv "
 fi
 
 AC_STRUCT_TIMEZONE

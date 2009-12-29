@@ -3843,109 +3843,6 @@ eval_cdecl(self, node, result)
 #endif
 
 #ifdef THREADED_DISPATCH
-#ifdef USE_REPL_SWITCH_DISPATCH
-#define DISPATCH_TABLE {{
-#define NEXT_NODE do { \
-  CHECK_INTS; \
-    result = Qnil; \
-    if (!node) return result; \
-    ruby_current_node = node; \
-    switch(nd_type(node)) { \
-    case NODE_SCOPE: goto TARGET_NODE_SCOPE; \
-    case NODE_BLOCK: goto TARGET_NODE_BLOCK; \
-    case NODE_IF: goto TARGET_NODE_IF; \
-    case NODE_CASE: goto TARGET_NODE_CASE; \
-    case NODE_WHEN: goto TARGET_NODE_WHEN; \
-    case NODE_OPT_N: goto TARGET_NODE_OPT_N; \
-    case NODE_WHILE: goto TARGET_NODE_WHILE; \
-    case NODE_UNTIL: goto TARGET_NODE_UNTIL; \
-    case NODE_ITER: goto TARGET_NODE_ITER; \
-    case NODE_FOR: goto TARGET_NODE_ITER; \
-    case NODE_BREAK: goto TARGET_NODE_BREAK; \
-    case NODE_NEXT: goto TARGET_NODE_NEXT; \
-    case NODE_REDO: goto TARGET_NODE_REDO; \
-    case NODE_RETRY: goto TARGET_NODE_RETRY; \
-    case NODE_RESCUE: goto TARGET_NODE_RESCUE; \
-    case NODE_ENSURE: goto TARGET_NODE_ENSURE; \
-    case NODE_AND: goto TARGET_NODE_AND; \
-    case NODE_OR: goto TARGET_NODE_OR; \
-    case NODE_NOT: goto TARGET_NODE_NOT; \
-    case NODE_MASGN: goto TARGET_NODE_MASGN; \
-    case NODE_LASGN: goto TARGET_NODE_LASGN; \
-    case NODE_DASGN: goto TARGET_NODE_DASGN; \
-    case NODE_DASGN_CURR: goto TARGET_NODE_DASGN_CURR; \
-    case NODE_GASGN: goto TARGET_NODE_GASGN; \
-    case NODE_IASGN: goto TARGET_NODE_IASGN; \
-    case NODE_CDECL: goto TARGET_NODE_CDECL; \
-    case NODE_CVASGN: goto TARGET_NODE_CVASGN; \
-    case NODE_CVDECL: goto TARGET_NODE_CVDECL; \
-    case NODE_OP_ASGN1: goto TARGET_NODE_OP_ASGN1; \
-    case NODE_OP_ASGN2: goto TARGET_NODE_OP_ASGN2; \
-    case NODE_OP_ASGN_AND: goto TARGET_NODE_OP_ASGN_AND; \
-    case NODE_OP_ASGN_OR: goto TARGET_NODE_OP_ASGN_OR; \
-    case NODE_CALL: goto TARGET_NODE_CALL; \
-    case NODE_FCALL: goto TARGET_NODE_FCALL; \
-    case NODE_VCALL: goto TARGET_NODE_VCALL; \
-    case NODE_SUPER: goto TARGET_NODE_SUPER; \
-    case NODE_ZSUPER: goto TARGET_NODE_SUPER; \
-    case NODE_ARRAY: goto TARGET_NODE_ARRAY; \
-    case NODE_ZARRAY: goto TARGET_NODE_ZARRAY; \
-    case NODE_HASH: goto TARGET_NODE_HASH; \
-    case NODE_RETURN: goto TARGET_NODE_RETURN; \
-    case NODE_YIELD: goto TARGET_NODE_YIELD; \
-    case NODE_LVAR: goto TARGET_NODE_LVAR; \
-    case NODE_DVAR: goto TARGET_NODE_DVAR; \
-    case NODE_GVAR: goto TARGET_NODE_GVAR; \
-    case NODE_IVAR: goto TARGET_NODE_IVAR; \
-    case NODE_CONST: goto TARGET_NODE_CONST; \
-    case NODE_CVAR: goto TARGET_NODE_CVAR; \
-    case NODE_NTH_REF: goto TARGET_NODE_NTH_REF; \
-    case NODE_BACK_REF: goto TARGET_NODE_BACK_REF; \
-    case NODE_MATCH: goto TARGET_NODE_MATCH; \
-    case NODE_MATCH2: goto TARGET_NODE_MATCH2; \
-    case NODE_MATCH3: goto TARGET_NODE_MATCH3; \
-    case NODE_LIT: goto TARGET_NODE_LIT; \
-    case NODE_STR: goto TARGET_NODE_STR; \
-    case NODE_DSTR: goto TARGET_NODE_DSTR; \
-    case NODE_XSTR: goto TARGET_NODE_XSTR; \
-    case NODE_DXSTR: goto TARGET_NODE_DSTR; \
-    case NODE_EVSTR: goto TARGET_NODE_EVSTR; \
-    case NODE_DREGX: goto TARGET_NODE_DSTR; \
-    case NODE_DREGX_ONCE: goto TARGET_NODE_DSTR; \
-    case NODE_ARGSCAT: goto TARGET_NODE_ARGSCAT; \
-    case NODE_ARGSPUSH: goto TARGET_NODE_ARGSPUSH; \
-    case NODE_SPLAT: goto TARGET_NODE_SPLAT; \
-    case NODE_TO_ARY: goto TARGET_NODE_TO_ARY; \
-    case NODE_SVALUE: goto TARGET_NODE_SVALUE; \
-    case NODE_BLOCK_ARG: goto TARGET_NODE_BLOCK_ARG; \
-    case NODE_BLOCK_PASS: goto TARGET_NODE_BLOCK_PASS; \
-    case NODE_DEFN: goto TARGET_NODE_DEFN; \
-    case NODE_DEFS: goto TARGET_NODE_DEFS; \
-    case NODE_ALIAS: goto TARGET_NODE_ALIAS; \
-    case NODE_VALIAS: goto TARGET_NODE_VALIAS; \
-    case NODE_UNDEF: goto TARGET_NODE_UNDEF; \
-    case NODE_CLASS: goto TARGET_NODE_CLASS; \
-    case NODE_MODULE: goto TARGET_NODE_MODULE; \
-    case NODE_SCLASS: goto TARGET_NODE_SCLASS; \
-    case NODE_COLON2: goto TARGET_NODE_COLON2; \
-    case NODE_COLON3: goto TARGET_NODE_COLON3; \
-    case NODE_DOT2: goto TARGET_NODE_DOT2; \
-    case NODE_DOT3: goto TARGET_NODE_DOT2; \
-    case NODE_FLIP2: goto TARGET_NODE_FLIP2; \
-    case NODE_FLIP3: goto TARGET_NODE_FLIP3; \
-    case NODE_SELF: goto TARGET_NODE_SELF; \
-    case NODE_NIL: goto TARGET_NODE_NIL; \
-    case NODE_TRUE: goto TARGET_NODE_TRUE; \
-    case NODE_FALSE: goto TARGET_NODE_FALSE; \
-    case NODE_DEFINED: goto TARGET_NODE_DEFINED; \
-    case NODE_NEWLINE: goto TARGET_NODE_NEWLINE; \
-    case NODE_POSTEXE: goto TARGET_NODE_POSTEXE; \
-    case NODE_DSYM: goto TARGET_NODE_DSTR; \
-    case NODE_ATTRASGN: goto TARGET_NODE_ATTRASGN; \
-    default: unknown_node(node); \
-    } \
-} while(0)
-#else
 #define DISPATCH_TABLE \
 static const void *dispatch_table[104] = { \
     &&TARGET_UNDEF, \
@@ -3965,7 +3862,7 @@ static const void *dispatch_table[104] = { \
     &&TARGET_NODE_NEXT, \
     &&TARGET_NODE_REDO, \
     &&TARGET_NODE_RETRY, \
-    &&TARGET_UNDEF, \
+    &&TARGET_NODE_BEGIN, \
     &&TARGET_NODE_RESCUE, \
     &&TARGET_UNDEF, \
     &&TARGET_NODE_ENSURE, \
@@ -4061,11 +3958,8 @@ static const void *dispatch_table[104] = { \
     ruby_current_node = node; \
     goto *dispatch_table[nd_type(node)]; \
 } while (0)
-#endif
 #define DISPATCH_BEGIN NEXT_NODE; 
-#define ND_VALUE(n) #n
-#define TARGET(node) TARGET_##node: \
-   asm("#" ND_VALUE(n));
+#define TARGET(node) TARGET_##node:
 #define TARGET_ALIAS(node)
 #define BREAK return result;
 #define DEFAULT_NODE TARGET_UNDEF: \
